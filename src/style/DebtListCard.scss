@@ -1,0 +1,44 @@
+.list-card {
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  padding: 20px 16px;
+  justify-content: space-between;
+  box-shadow: var(--light-shadow1);
+
+  @media (max-width: 768px) {
+    padding: 12px;
+  };
+
+  .header {
+    padding: 8px;
+
+    .actions {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin-top: 12px;
+
+      .buttons {
+        display: flex;
+        gap: 8px;
+        height: 35px;
+
+        button {
+          padding-left: 12px;
+          padding-right: 12px;
+          font-size: 0.875rem;
+          border-width: 2px;
+          border-color: #AB6B2E;
+          background-color: #FFDCAB;
+          transition: all 0.3s;
+          border-radius: 8px;
+
+          &:hover {
+            color: #AB6B2E;
+          };
+        };
+      };
+    };
+  };
+};
