@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell } from "recharts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+import "../../../style/AreaCards.scss";
 
 const AreaCard = ({ percentFillValue, totalDebtAmount, colors, cardInfo, linkTo }) => {
   const filledValue = percentFillValue;
@@ -21,10 +22,11 @@ const AreaCard = ({ percentFillValue, totalDebtAmount, colors, cardInfo, linkTo 
         <div className="info-value">
           {cardInfo.value}
         </div>
-        <div className="info-div">
-          <p className="info-text">{cardInfo.text}</p>
-          <Link to={linkTo}>
-            <FontAwesomeIcon icon={faArrowRight} className="info-icon" />
+        <div>
+          <Link to={linkTo} className="info-div">
+            <p className="info-text">{cardInfo.text}
+              <FontAwesomeIcon icon={faArrowRight} className="info-icon" />
+            </p>
           </Link>
         </div>
       </div>
@@ -54,13 +56,11 @@ const AreaCard = ({ percentFillValue, totalDebtAmount, colors, cardInfo, linkTo 
 export default AreaCard;
 
 AreaCard.propTypes = {
-  percentFillValue: PropTypes.number.isRequired,
-  totalDebtAmount: PropTypes.number.isRequired,
   colors: PropTypes.array.isRequired,
   cardInfo: PropTypes.shape({
     title: PropTypes.string.isRequired,
     value: PropTypes.string.isRequired,
     text: PropTypes.string.isRequired
   }).isRequired,
-  linkTo: PropTypes.string.isRequired,
+  linkTo: PropTypes.string.isRequired
 };

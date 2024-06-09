@@ -4,9 +4,8 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import Login from './screens/Login';
 import Register from './screens/Register';
 import Dashboard from './screens/Dashboard';
-import PrivateRoute from './screens/PrivateRoute';
+import PrivateRoute from './routes/PrivateRoute';
 import Debts from './screens/Debts';
-import PaymentPlan from './screens/PaymentPlan';
 
 function App() {
   const user = useSelector((state) => state.auth.user);
@@ -32,14 +31,6 @@ function App() {
             element={
               <PrivateRoute>
                 <Debts />
-              </PrivateRoute>
-            }
-          />
-          <Route
-            path="/paymentplan"
-            element={
-              <PrivateRoute>
-                <PaymentPlan />
               </PrivateRoute>
             }
           />

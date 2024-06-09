@@ -2,15 +2,15 @@ import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
-  XAxis,
-  YAxis,
+  XAxis as RechartsXAxis,
+  YAxis as RechartsYAxis,
   Tooltip,
   Legend,
   ResponsiveContainer,
 } from "recharts";
 import "../../../style/AreaCharts.scss";
 
-const AreaBarChart = ({ overduePayments, paidPayments, totalDebtAmount }) => {
+const AreaBarChart = ({ overdueAllPayments, paidPayments, totalDebtAmount }) => {
   const [chartData, setChartData] = useState([]);
   const allMonths = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -18,38 +18,41 @@ const AreaBarChart = ({ overduePayments, paidPayments, totalDebtAmount }) => {
   ];
 
   useEffect(() => {
+    const currentYear = new Date().getFullYear();
     const monthlyData = {};
 
-    allMonths.forEach(month => {
-      monthlyData[month] = { month: month, paid: 0, remaining: 0 };
+    allMonths.forEach((month, index) => {
+      const key = `${month} ${currentYear}`;
+      monthlyData[key] = { month: month, paid: 0, remaining: 0, year: currentYear, order: index };
     });
 
-    overduePayments.forEach(payment => {
-      const paymentDate = new Date(payment.paymentDate);
-      const month = paymentDate.toLocaleString('default', { month: 'short' });
-      const year = paymentDate.getFullYear();
-      const key = `${month} ${year}`;
+    if (overdueAllPayments) {
+      overdueAllPayments.forEach(payment => {
+        const paymentDate = new Date(payment.paymentDate);
+        const month = allMonths[paymentDate.getMonth()];
+        const year = paymentDate.getFullYear();
+        if (year === currentYear && allMonths.includes(month)) {
+          const key = `${month} ${year}`;
+          monthlyData[key].remaining += payment.amount;
+        };
+      });
+    };
 
-      if (!monthlyData[month]) {
-        monthlyData[month] = { month: month, paid: 0, remaining: 0 };
-      };
-      monthlyData[month].remaining += payment.amount;
-    });
+    if (paidPayments) {
+      paidPayments.forEach(payment => {
+        const paymentDate = new Date(payment.paymentDate);
+        const month = allMonths[paymentDate.getMonth()];
+        const year = paymentDate.getFullYear();
+        if (year === currentYear && allMonths.includes(month)) {
+          const key = `${month} ${year}`;
+          monthlyData[key].paid += payment.amount;
+        };
+      });
+    };
 
-    paidPayments.forEach(payment => {
-      const paymentDate = new Date(payment.paymentDate);
-      const month = paymentDate.toLocaleString('default', { month: 'short' });
-      const year = paymentDate.getFullYear();
-      const key = `${month} ${year}`;
-
-      if (!monthlyData[month]) {
-        monthlyData[month] = { month: month, paid: 0, remaining: 0 };
-      };
-      monthlyData[month].paid += payment.amount;
-    });
-
-    setChartData(Object.values(monthlyData));
-  }, [overduePayments, paidPayments]);
+    const sortedData = Object.values(monthlyData).sort((a, b) => a.order - b.order);
+    setChartData(sortedData);
+  }, [overdueAllPayments, paidPayments]);
 
   const formatTooltipValue = (value) => {
     return `${value.toFixed(2)} TL`;
@@ -68,7 +71,7 @@ const AreaBarChart = ({ overduePayments, paidPayments, totalDebtAmount }) => {
       <div className="bar-chart-info">
         <h5 className="bar-chart-title">Aylık Borç Durumu</h5>
         <div className="chart-info-data">
-          {totalDebtAmount > 0 ? [] :
+          {totalDebtAmount > 0 ? null :
             <div className="info-data-text">
               <p>Herhangi bir borcunuz bulunamamaktadır.</p>
             </div>
@@ -88,16 +91,14 @@ const AreaBarChart = ({ overduePayments, paidPayments, totalDebtAmount }) => {
               bottom: 5,
             }}
           >
-            <XAxis
+            <RechartsXAxis
               padding={{ left: 10 }}
               dataKey="month"
-              tickSize={0}
               axisLine={false}
-              tick={{
-                fontSize: 14,
-              }}
+              tick={{ fontSize: 14 }}
+              tickCount={allMonths.length}
             />
-            <YAxis
+            <RechartsYAxis
               padding={{ bottom: 10, top: 10 }}
               tickFormatter={formatYAxisLabel}
               tickCount={6}
@@ -137,6 +138,6 @@ const AreaBarChart = ({ overduePayments, paidPayments, totalDebtAmount }) => {
         </ResponsiveContainer>
       </div>
     </div>
-  )
+  );
 };
 export default AreaBarChart;

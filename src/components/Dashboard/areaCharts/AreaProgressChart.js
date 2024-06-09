@@ -33,7 +33,7 @@ const AreaProgressChart = ({ overduePayments, totalDebtAmount }) => {
             </div>
             <div className="progress-bar-list">
                 {sortedOverduePayments.length > 0 ? (
-                    sortedOverduePayments.map((debt) => {
+                    sortedOverduePayments.map((debt, index) => {
                         const debtPercentage = (debt.amount / totalDebtAmount) * 100;
                         const lenderNameDisplay = debt.lenderName.length > 12 ? `${debt.lenderName.substring(0, 11)}...` : debt.lenderName;
                         const textStyle = {
@@ -41,7 +41,7 @@ const AreaProgressChart = ({ overduePayments, totalDebtAmount }) => {
                         };
 
                         return (
-                            <div className="progress-bar-item" key={debt.id}>
+                            <div className="progress-bar-item" key={index}>
                                 <div className="bar-item-info">
                                     <p className="bar-item-info-name" style={textStyle}>
                                         {lenderNameDisplay} - {new Date(debt.paymentDate).toLocaleDateString('tr-TR')}

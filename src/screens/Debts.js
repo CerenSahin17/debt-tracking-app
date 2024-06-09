@@ -1,42 +1,97 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDebtData, addDebt } from '../redux/debt/debtSlice';
-import { Button, Modal, Table, InputNumber } from 'antd';
-import Navbar from '../components/Navbar';
-import DebtListCard from '../components/Debts/DebtListCard';
+import { fetchDebtData, debtDetail, addDebt, updateDebt, deleteDebt } from '../redux/debt/debtSlice';
+import { fetchPaymentPlanData } from '../../src/redux/paymentPlan/paymentSlice';
+import Navbar from '../../src/components/Navbar';
+import DebtListCard from '../../src/components/Debts/DebtListCard';
+import AddDebtModal from '../../src/components/Debts/AddDebtModal';
+import PaymentPlanModal from '../../src/components/Debts/PaymentPlanModal';
+import PaymentPlanListModal from '../components/Debts/PaymentPlanListModal';
 import '../style/AreaCards.scss';
+import { Spin } from 'antd';
 
 const Debts = () => {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
     const debtData = useSelector((state) => state.debt.data);
-    const [isModalVisible, setIsModalVisible] = useState(false);
+    const paymentPlanListData = useSelector((state) => state.paymentPlan.data);
+    const [isAddDebtModalVisible, setIsAddDebtModalVisible] = useState(false);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [isPaymentPlanModalVisible, setIsPaymentPlanModalVisible] = useState(false);
+    const [isPaymentPlanListModalVisible, setIsPaymentPlanListModalVisible] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isLoadingDelete, setIsLoadingDelete] = useState(false);
+    const [selectedDebtId, setSelectedDebtId] = useState(0);
+    const debtDetailData = useSelector((state) => state.debt.detail);
     const [newDebt, setNewDebt] = useState({
         debtName: '',
         lenderName: '',
-        debtAmount: 0,
-        interestRate: 0,
-        amount: 0,
+        debtAmount: '',
+        interestRate: '',
+        amount: '',
         paymentStart: new Date().toISOString().substr(0, 10),
+        paymentPlan: [
+            {
+                paymentDate: '',
+                paymentAmount: ''
+            },
+        ],
         installment: '',
         description: ''
     });
     const [error, setError] = useState('');
-    const [paymentPlanVisible, setPaymentPlanVisible] = useState(false);
     const [paymentPlan, setPaymentPlan] = useState([]);
 
     useEffect(() => {
         if (user) {
-            dispatch(fetchDebtData());
+            setLoadingPage(true);
+            dispatch(fetchDebtData()).then(() => setLoadingPage(false));
         };
     }, [user, dispatch]);
 
-    const sortedDebt = [...debtData].sort((a, b) =>
+    useEffect(() => {
+        if (user) {
+            setPaymentPlan(paymentPlanListData);
+        }
+    }, [paymentPlanListData]);
+
+    useEffect(() => {
+        if (isEditMode && debtDetailData) {
+            setNewDebt({
+                debtName: debtDetailData.data.debtName,
+                lenderName: debtDetailData.data.lenderName,
+                debtAmount: debtDetailData.data.debtAmount,
+                interestRate: debtDetailData.data.interestRate,
+                amount: debtDetailData.data.amount,
+                paymentStart: new Date(debtDetailData.data.paymentStart).toISOString().substr(0, 10),
+                paymentPlan: debtDetailData.data.paymentPlan,
+                installment: debtDetailData.data.installment,
+                description: debtDetailData.data.description
+            });
+
+            setIsAddDebtModalVisible(true);
+        };
+    }, [isEditMode, debtDetailData]);
+
+    const sortedOverduePayments = [...debtData].sort((a, b) =>
         new Date(a.paymentStart) - new Date(b.paymentStart)
     );
 
-    const showModal = () => {
-        setIsModalVisible(true);
+    console.log(sortedOverduePayments, '33333')
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        const updatedDebt = { ...newDebt, [name]: value };
+
+        if (name === 'debtAmount' || name === 'interestRate') {
+            const totalAmount = updatedDebt.debtAmount * (1 + updatedDebt.interestRate / 100);
+            updatedDebt.amount = parseFloat(totalAmount.toFixed(2));
+        };
+
+        setNewDebt(updatedDebt);
+        setError('');
     };
 
     const handleOk = () => {
@@ -62,159 +117,203 @@ const Debts = () => {
                 ...newDebt,
                 debtAmount: parseFloat(debtAmount),
                 interestRate: parseFloat(interestRate),
-                amount: parseFloat(totalAmount.toFixed(2)),
                 installment: installmentCount,
                 paymentPlan: paymentPlan
             };
-            setPaymentPlan(debtDataWithPaymentPlan);
-            setPaymentPlanVisible(true);
-            console.log('Debt Body', debtDataWithPaymentPlan);
+
+            setPaymentPlan(paymentPlan);
+            setNewDebt(debtDataWithPaymentPlan);
+            setIsPaymentPlanModalVisible(true);
         };
     };
 
     const handleCancel = () => {
-        setIsModalVisible(false);
-    };
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        const updatedDebt = { ...newDebt, [name]: value };
-
-        if (name === 'debtAmount' || name === 'interestRate') {
-            const debtAmount = parseFloat(updatedDebt.debtAmount) || 0;
-            const interestRate = parseFloat(updatedDebt.interestRate) || 0;
-            const totalAmount = debtAmount * (1 + interestRate / 100);
-            updatedDebt.amount = totalAmount.toFixed(2);
-        };
-
-        setNewDebt(updatedDebt);
-        setError('');
+        setIsAddDebtModalVisible(false);
+        setIsEditMode(false);
+        setNewDebt({
+            debtName: '',
+            lenderName: '',
+            debtAmount: '',
+            interestRate: '',
+            amount: '',
+            paymentStart: new Date().toISOString().substr(0, 10),
+            paymentPlan: [
+                {
+                    paymentDate: '',
+                    paymentAmount: ''
+                },
+            ],
+            installment: '',
+            description: ''
+        });
     };
 
     const handleSave = () => {
-        dispatch(addDebt(debtData));
-        dispatch(fetchDebtData());
-        setPaymentPlanVisible(false);
-        setIsModalVisible(false);
+        setIsLoading(true);
+        let action;
+        let requestData;
+
+        if (isEditMode) {
+            action = updateDebt;
+            requestData = { debtId: selectedDebtId, updatedData: newDebt };
+        } else {
+            action = addDebt;
+            requestData = newDebt;
+        };
+
+        dispatch(action(requestData))
+            .then(() => {
+                setLoadingPage(true);
+                dispatch(fetchDebtData()).then(() => setLoadingPage(false));
+                setIsPaymentPlanModalVisible(false);
+                setIsAddDebtModalVisible(false);
+                setNewDebt({
+                    debtName: '',
+                    lenderName: '',
+                    debtAmount: '',
+                    interestRate: '',
+                    amount: '',
+                    paymentStart: new Date().toISOString().substr(0, 10),
+                    paymentPlan: [
+                        {
+                            paymentDate: '',
+                            paymentAmount: ''
+                        },
+                    ],
+                    installment: '',
+                    description: ''
+                });
+                console.log('Borç güncelleme işlemi başarıyla gerçekleştirildi.');
+            })
+            .catch(error => {
+                console.error("Borç güncelleme işlemi sırasında bir hata oluştu:", error);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    };
+
+    const deletedDebt = async () => {
+        try {
+            setIsLoadingDelete(true);
+            await dispatch(deleteDebt(selectedDebtId));
+            setLoadingPage(true);
+            await dispatch(fetchDebtData()).then(() => setLoadingPage(false));
+            setNewDebt({
+                debtName: '',
+                lenderName: '',
+                debtAmount: '',
+                interestRate: '',
+                amount: '',
+                paymentStart: new Date().toISOString().substr(0, 10),
+                paymentPlan: [
+                    {
+                        paymentDate: '',
+                        paymentAmount: ''
+                    },
+                ],
+                installment: '',
+                description: ''
+            });
+            console.log('İşlem başarıyla gerçekleştirildi.');
+        } catch (error) {
+            console.error('İşlem sırasında bir hata oluştu:', error);
+        } finally {
+            setIsLoadingDelete(false);
+            setIsAddDebtModalVisible(false);
+            setIsEditMode(false);
+        };
+    };
+
+    const handleDelete = () => {
+        deletedDebt();
     };
 
     const handleBack = () => {
-        setPaymentPlanVisible(false);
+        setIsPaymentPlanModalVisible(false);
     };
 
-    const columns = [
-        {
-            title: 'Taksit Tarihi',
-            dataIndex: 'paymentDate',
-            key: 'paymentDate'
-        },
-        {
-            title: 'Taksit Miktarı',
-            dataIndex: 'paymentAmount',
-            key: 'paymentAmount',
-            render: (text, record, index) => (
-                <InputNumber
-                    min={0}
-                    defaultValue={text}
-                />
-            )
-        }
-    ];
+    const handleShowPaymentPlan = (debtId) => {
+        setIsPaymentPlanListModalVisible(true);
+        dispatch(fetchPaymentPlanData(debtId));
+        setSelectedDebtId(debtId);
+        console.log(selectedDebtId, 'debtid');
+    };
 
-    const PaymentPlanTable = ({ paymentPlan }) => {
-        return <Table columns={columns} dataSource={paymentPlan} pagination={false} />;
+    const handleRear = () => {
+        setIsPaymentPlanListModalVisible(false);
+        setPaymentPlan(null);
+    };
+
+    const handleShowDebtDetail = (debtId) => {
+        setLoading(true);
+        setIsEditMode(true);
+        setIsAddDebtModalVisible(true);
+        dispatch(debtDetail(debtId)).then(() => setLoading(false));
+        setSelectedDebtId(debtId);
     };
 
     return (
-        <div>
+        <>
             <Navbar />
-            <div className='content-area'>
-                <div className="text-center md:text-left flex justify-center">
-                    <button className="mt-6 bg-blue-700 hover:bg-blue-800 px-4 py-2 text-white uppercase rounded text-xs tracking-wider" style={{ backgroundColor: 'rgb(18, 26, 77)' }} type="submit" onClick={showModal}>Borç Ekle</button>
+            {loadingPage ? (
+                <div className='flex justify-center items-center h-screen'>
+                    <Spin size="large" />
                 </div>
-                <Modal
-                    title={<span style={{ color: 'rgb(18, 26, 77)' }}>Borç Ekle</span>}
-                    visible={isModalVisible}
-                    onOk={handleOk}
-                    onCancel={handleCancel}
-                    style={{ borderRadius: 20 }}
-                    bodyStyle={{ padding: "20px" }}
-                    footer={[
-                        <Button key="back" onClick={handleCancel} style={{ color: 'rgba(0, 0, 0, 0.65)', borderColor: 'rgb(18, 26, 77)' }}>
-                            İptal
-                        </Button>,
-                        <Button key="submit" type="primary" onClick={handleOk} style={{ backgroundColor: 'rgb(18, 26, 77)' }}>
-                            Ödeme Planı Oluştur
-                        </Button>,
-                    ]}
-                >
-                    {error && <p style={{ color: 'red', marginBottom: 10 }}>{error}</p>}
-                    <div style={{ marginBottom: "15px" }}>
-                        <input className="text-sm w-full px-4 py-2.5 border border-solid border-gray-300 rounded mb-2" type="text" id="debtName" name="debtName" placeholder="Borç Adı" onChange={handleInputChange} />
+            ) : (
+                <div className='content-area'>
+                    <div className="text-center md:text-left flex justify-center">
+                        <button className="mt-6 bg-blue-700 hover:bg-blue-800 px-4 py-2 text-white uppercase rounded text-xs tracking-wider" style={{ backgroundColor: 'rgb(18, 26, 77)' }} type="submit" onClick={() => setIsAddDebtModalVisible(true)}>Borç Ekle</button>
                     </div>
-                    <div style={{ marginBottom: "15px" }}>
-                        <input className="text-sm w-full px-4 py-2.5 border border-solid border-gray-300 rounded mb-2" type="text" id="lenderName" name="lenderName" placeholder="Borç Veren" onChange={handleInputChange} />
-                    </div>
-                    <div style={{ marginBottom: "15px" }}>
-                        <input className="text-sm w-full px-4 py-2.5 border border-solid border-gray-300 rounded mb-2" type="number" id="debtAmount" name="debtAmount" placeholder="Miktar" onChange={handleInputChange} />
-                    </div>
-                    <div style={{ marginBottom: "15px" }}>
-                        <input className="text-sm w-full px-4 py-2.5 border border-solid border-gray-300 rounded mb-2" type="number" id="interestRate" name="interestRate" placeholder="Faiz Oranı" onChange={handleInputChange} />
-                    </div>
-                    <div style={{ marginBottom: "15px" }}>
-                        <input className="text-sm w-full px-4 py-2.5 border border-solid border-gray-300 rounded mb-2" type="text" id="amount" name="amount" placeholder="Toplam Tutar" value={newDebt.amount} readOnly />
-                    </div>
-
-                    <div style={{ marginBottom: "15px" }}>
-                        <input className="text-sm w-full px-4 py-2.5 border border-solid border-gray-300 rounded mb-2" type="date" id="paymentStart" name="paymentStart" placeholder="Başlangıç Tarihi" value={newDebt.paymentStart || new Date().toISOString().substr(0, 10)} onChange={handleInputChange} />
-                    </div>
-                    <div style={{ marginBottom: "15px" }}>
-                        <input className="text-sm w-full px-4 py-2.5 border border-solid border-gray-300 rounded mb-2" type="number" id="installment" name="installment" placeholder="Taksit" onChange={handleInputChange} />
-                    </div>
-                    <div style={{ marginBottom: "15px" }}>
-                        <input className="text-sm w-full px-4 py-2.5 border border-solid border-gray-300 rounded mb-2" type="text" id="description" name="description" placeholder="Açıklama" onChange={handleInputChange} />
-                    </div>
-                </Modal>
-                {paymentPlanVisible && (
-                    <Modal
-                        title="Taksit Planı"
-                        visible={paymentPlanVisible}
-                        onOk={handleSave}
+                    <AddDebtModal
+                        visible={isAddDebtModalVisible}
+                        onCancel={handleCancel}
+                        onOk={handleOk}
+                        onDelete={handleDelete}
+                        handleInputChange={handleInputChange}
+                        newDebt={newDebt}
+                        error={error}
+                        isEditMode={isEditMode}
+                        debtDetailData={debtDetailData}
+                        loadingDelete={isLoadingDelete}
+                        loading={loading}
+                    />
+                    <PaymentPlanModal
+                        visible={isPaymentPlanModalVisible}
                         onCancel={handleBack}
-                        footer={[
-                            <Button key="back" onClick={handleBack} style={{ color: 'rgba(0, 0, 0, 0.65)', borderColor: 'rgb(18, 26, 77)' }}>
-                                Vazgeç
-                            </Button>,
-                            <Button key="submit" type="primary" onClick={handleSave} style={{ backgroundColor: 'rgb(18, 26, 77)' }}>
-                                Kaydet
-                            </Button>,
-                        ]}
-                    >
-                        <PaymentPlanTable paymentPlan={paymentPlan} />
-                    </Modal>
-                )}
-                <div className='content-area-cards'>
-                    {debtData.length > 0 ? (
-                        sortedDebt.map(debt => (
-                            <DebtListCard
-                                key={debt.id}
-                                debtName={debt.debtName}
-                                lenderName={debt.lenderName}
-                                debtAmount={debt.debtAmount}
-                                interestRate={debt.interestRate}
-                                amount={debt.amount}
-                                paymentStart={debt.paymentStart}
-                                installment={debt.installment}
-                                description={debt.description}
-                            />
-                        ))
-                    ) : <p className="progress-description-title text-center">Herhangi bir borcunuz bulunmamaktadır.</p>
-                    }
+                        onOk={handleSave}
+                        paymentPlan={paymentPlan}
+                        loading={isLoading}
+                    />
+                    <PaymentPlanListModal
+                        visible={isPaymentPlanListModalVisible}
+                        onCancel={handleRear}
+                        paymentPlan={paymentPlan}
+                        debtId={selectedDebtId}
+                    />
+                    <div className='content-area-cards'>
+                        {debtData.length > 0 ? (
+                            sortedOverduePayments.map((debt, index) => (
+                                <DebtListCard
+                                    key={index}
+                                    debtName={debt.debtName}
+                                    lenderName={debt.lenderName}
+                                    debtAmount={debt.debtAmount}
+                                    interestRate={debt.interestRate}
+                                    amount={debt.amount}
+                                    paymentStart={debt.paymentStart}
+                                    installment={debt.installment}
+                                    description={debt.description}
+                                    onClick={() => handleShowPaymentPlan(debt.id)}
+                                    onEdit={() => handleShowDebtDetail(debt.id)}
+                                />
+                            ))
+                        ) : <p className="progress-description-title text-center">Herhangi bir borcunuz bulunmamaktadır.</p>
+                        }
+                    </div>
                 </div>
-            </div>
-        </div>
+            )}
+        </>
     );
 };
 export default Debts;
-
-
