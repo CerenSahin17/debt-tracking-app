@@ -6,9 +6,10 @@ const translations = {
   "\"name\" is not allowed to be empty": "Lütfen bir isim giriniz.",
   "\"email\" is not allowed to be empty": "Lütfen bir e-posta adresi giriniz.",
   "\"password\" is not allowed to be empty": "Lütfen bir şifre giriniz.",
-  "\"email\" must be a valid email": "Lütfen geçerli bir e-posta adresi giriniz",
+  "\"email\" must be a valid email": "Lütfen geçerli bir e-posta adresi giriniz.",
   "\"password\" with value \"12\" fails to match the required pattern: /^[a-zA-Z0-9]{6,12}$/": "Şifre en az 6 karakter olmalıdır.",
-  "User already exists": "Kullanıcı zaten var."
+  "User already exists": "Kullanıcı zaten var.",
+  "\"name\" must only contain alpha-numeric characters": "İsim yalnızca alfasayısal karakterler içermelidir."
 };
 
 const translate = (text) => {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const axiosInstance = axios.create({
-    baseURL: 'https://study.logiper.com/finance',
+    baseURL: 'https://study.logiper.com/finance'
 });
 
 axiosInstance.interceptors.request.use(

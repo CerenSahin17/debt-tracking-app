@@ -9,7 +9,7 @@ import Debts from './screens/Debts';
 
 function App() {
   const user = useSelector((state) => state.auth.user);
-  console.log('user2', user)
+  console.log('user', user)
 
   return (
     <Router>

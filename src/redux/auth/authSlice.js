@@ -2,7 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const initialState = {
-  user: JSON.parse(localStorage.getItem('user')) || null,
+  user: localStorage.getItem('token') || null,
   status: 'idle',
   error: null
 };
@@ -19,18 +19,19 @@ export const login = createAsyncThunk('auth/login', async (userData, { rejectWit
   } catch (error) {
     console.error('Login Error', error.response ? error.response.data : error.message);
     return rejectWithValue(error.response ? error.response.data : error.message);
-  }
+  };
 });
 
 export const register = createAsyncThunk('auth/register', async (userData, { rejectWithValue }) => {
   try {
     const response = await axios.post(REGISTER_URL, userData);
     console.log('Register Data', response.data);
+    localStorage.setItem('token', response.data.data);
     return response.data;
   } catch (error) {
     console.error('Register Error', error.response ? error.response.data : error.message);
     return rejectWithValue(error.response ? error.response.data : error.message);
-  }
+  };
 });
 
 const authSlice = createSlice({
@@ -39,7 +40,7 @@ const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.user = null;
-      localStorage.removeItem('user');
+      localStorage.removeItem('token');
     }
   },
   extraReducers: (builder) => {

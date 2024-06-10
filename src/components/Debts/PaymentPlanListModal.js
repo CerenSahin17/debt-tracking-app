@@ -5,7 +5,6 @@ import { Modal, Button, Checkbox, Spin } from 'antd';
 import moment from 'moment';
 
 const PaymentPlanListModal = ({ visible, onCancel, paymentPlan, debtId }) => {
-    console.log(paymentPlan, '993933939')
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
 

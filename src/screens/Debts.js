@@ -54,7 +54,7 @@ const Debts = () => {
     useEffect(() => {
         if (user) {
             setPaymentPlan(paymentPlanListData);
-        }
+        };
     }, [paymentPlanListData]);
 
     useEffect(() => {
@@ -78,8 +78,6 @@ const Debts = () => {
     const sortedOverduePayments = [...debtData].sort((a, b) =>
         new Date(a.paymentStart) - new Date(b.paymentStart)
     );
-
-    console.log(sortedOverduePayments, '33333')
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -146,6 +144,7 @@ const Debts = () => {
             installment: '',
             description: ''
         });
+        setError('');
     };
 
     const handleSave = () => {
@@ -237,7 +236,6 @@ const Debts = () => {
         setIsPaymentPlanListModalVisible(true);
         dispatch(fetchPaymentPlanData(debtId));
         setSelectedDebtId(debtId);
-        console.log(selectedDebtId, 'debtid');
     };
 
     const handleRear = () => {
