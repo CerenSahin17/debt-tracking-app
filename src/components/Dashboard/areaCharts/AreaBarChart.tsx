@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  Legend,
-  ResponsiveContainer
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, CartesianGrid } from "recharts";
 import "../../../style/AreaCharts.scss";
 
 interface Payment {
@@ -114,24 +106,10 @@ const AreaBarChart: React.FC<AreaBarChartProps> = ({
               bottom: 5,
             }}
           >
-            <XAxis
-              padding={{ left: 10 }}
-              dataKey="month"
-              axisLine={false}
-              tick={{ fontSize: 14 }}
-              tickCount={allMonths.length}
-            />
-            <YAxis
-              padding={{ bottom: 10, top: 10 }}
-              tickFormatter={formatYAxisLabel}
-              tickCount={6}
-              axisLine={false}
-              tickSize={0}
-            />
-            <Tooltip
-              formatter={formatTooltipValue}
-              cursor={{ fill: "transparent" }}
-            />
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip formatter={formatTooltipValue} cursor={{ fill: "transparent" }} />
             <Legend
               iconType="circle"
               iconSize={10}
@@ -143,8 +121,7 @@ const AreaBarChart: React.FC<AreaBarChartProps> = ({
               name={"Ödenmiş"}
               dataKey="paid"
               fill="#475be8"
-              activeBar={false}
-              isAnimationActive={false}
+              stackId="a"
               barSize={24}
               radius={[4, 4, 4, 4]}
             />
@@ -152,8 +129,7 @@ const AreaBarChart: React.FC<AreaBarChartProps> = ({
               name={"Ödenmemiş"}
               dataKey="remaining"
               fill="#b0c4de"
-              activeBar={false}
-              isAnimationActive={false}
+              stackId="a"
               barSize={24}
               radius={[4, 4, 4, 4]}
             />

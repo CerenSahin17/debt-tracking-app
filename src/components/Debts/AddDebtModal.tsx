@@ -56,7 +56,7 @@ const AddDebtModal: React.FC<Props> = ({
             onOk={onOk}
             onCancel={onCancel}
             style={{ borderRadius: 20 }}
-            styles={{ body: { maxHeight: '400px', overflowY: 'auto', padding: '20px' } }}
+            styles={{ body: { maxHeight: isEditMode ? '400px' : 'auto', overflowY: isEditMode ? 'auto' : 'hidden', padding: '20px' } }}
             footer={[
                 <Button
                     key="back"
