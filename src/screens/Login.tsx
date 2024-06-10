@@ -1,7 +1,7 @@
 import React from 'react';
-import AuthForm from '../../src/components/Auth/AuthForm';
+import AuthForm from '../components/Auth/AuthForm.tsx';
 
-const Login = () => {
+const Login: React.FC = () => {
     return <AuthForm isLogin={true} />
 };
 export default Login;

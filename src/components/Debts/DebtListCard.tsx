@@ -1,7 +1,20 @@
 import React from "react";
 import '../../style/DebtListCard.scss';
 
-const DebtListCard = ({ debtName, lenderName, debtAmount, interestRate, amount, paymentStart, installment, description, onClick, onEdit }) => {
+interface Props {
+    debtName: string;
+    lenderName: string;
+    debtAmount: string;
+    interestRate: string;
+    amount: string;
+    paymentStart: string;
+    installment: string;
+    description: string;
+    onClick: () => void;
+    onEdit: () => void;
+};
+
+const DebtListCard: React.FC<Props> = ({ debtName, lenderName, debtAmount, interestRate, amount, paymentStart, installment, description, onClick, onEdit }) => {
     return (
         <div className="list-card bg-gray-100">
             <div>

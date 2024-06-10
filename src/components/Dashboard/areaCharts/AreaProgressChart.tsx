@@ -1,23 +1,34 @@
 import React from "react";
 
-const AreaProgressChart = ({ overduePayments, totalDebtAmount }) => {
+interface Payment {
+    paymentDate: string;
+    amount: number;
+    lenderName: string;
+};
+
+interface AreaProgressChartProps {
+    overduePayments: Payment[];
+    totalDebtAmount: number;
+};
+
+const AreaProgressChart: React.FC<AreaProgressChartProps> = ({ overduePayments, totalDebtAmount }) => {
     const sortedOverduePayments = overduePayments.sort((a, b) =>
-        new Date(a.paymentDate) - new Date(b.paymentDate)
+        new Date(a.paymentDate).getTime() - new Date(b.paymentDate).getTime()
     );
 
-    const isOverdue = (paymentStart) => {
+    const isOverdue = (paymentStart: string): boolean => {
         const today = new Date();
         const paymentDate = new Date(paymentStart);
-        return paymentDate < today.setHours(0, 0, 0, 0);
+        return paymentDate.getTime() < today.setHours(0, 0, 0, 0);
     };
 
-    const isToday = (paymentStart) => {
+    const isToday = (paymentStart: string): boolean => {
         const today = new Date();
         const paymentDate = new Date(paymentStart);
         return paymentDate.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0);
     };
 
-    const formatCurrency = (amount) => {
+    const formatCurrency = (amount: number): string => {
         return amount.toLocaleString('tr-TR', {
             style: 'currency',
             currency: 'TRY',

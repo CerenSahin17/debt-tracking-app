@@ -1,15 +1,15 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Login from './screens/Login';
-import Register from './screens/Register';
-import Dashboard from './screens/Dashboard';
-import PrivateRoute from './routes/PrivateRoute';
-import Debts from './screens/Debts';
+import Login from './screens/Login.tsx';
+import Register from './screens/Register.tsx';
+import Dashboard from './screens/Dashboard.tsx';
+import PrivateRoute from './routes/PrivateRoute.tsx';
+import Debts from './screens/Debts.tsx';
 
-function App() {
-  const user = useSelector((state) => state.auth.user);
-  console.log('user', user)
+const App: React.FC = () => {
+  const user = useSelector((state: any) => state.auth.user);
+  console.log('user', user);
 
   return (
     <Router>

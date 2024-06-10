@@ -1,52 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchDebtData, debtDetail, addDebt, updateDebt, deleteDebt } from '../redux/debt/debtSlice';
-import { fetchPaymentPlanData } from '../../src/redux/paymentPlan/paymentSlice';
-import Navbar from '../../src/components/Navbar';
-import DebtListCard from '../../src/components/Debts/DebtListCard';
-import AddDebtModal from '../../src/components/Debts/AddDebtModal';
-import PaymentPlanModal from '../../src/components/Debts/PaymentPlanModal';
-import PaymentPlanListModal from '../components/Debts/PaymentPlanListModal';
+import { fetchDebtData, debtDetail, addDebt, updateDebt, deleteDebt } from '../redux/debt/debtSlice.tsx';
+import { fetchPaymentPlanData } from '../redux/paymentPlan/paymentSlice.tsx';
+import Navbar from '../components/Navbar.tsx';
+import DebtListCard from '../components/Debts/DebtListCard.tsx';
+import AddDebtModal from '../components/Debts/AddDebtModal.tsx';
+import PaymentPlanModal from '../components/Debts/PaymentPlanModal.tsx';
+import PaymentPlanListModal from '../components/Debts/PaymentPlanListModal.tsx';
 import '../style/AreaCards.scss';
 import { Spin } from 'antd';
 
-const Debts = () => {
+const Debts: React.FC = () => {
     const dispatch = useDispatch();
-    const user = useSelector((state) => state.auth.user);
-    const debtData = useSelector((state) => state.debt.data);
-    const paymentPlanListData = useSelector((state) => state.paymentPlan.data);
-    const [isAddDebtModalVisible, setIsAddDebtModalVisible] = useState(false);
-    const [isEditMode, setIsEditMode] = useState(false);
-    const [isPaymentPlanModalVisible, setIsPaymentPlanModalVisible] = useState(false);
-    const [isPaymentPlanListModalVisible, setIsPaymentPlanListModalVisible] = useState(false);
-    const [loadingPage, setLoadingPage] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isLoadingDelete, setIsLoadingDelete] = useState(false);
-    const [selectedDebtId, setSelectedDebtId] = useState(0);
-    const debtDetailData = useSelector((state) => state.debt.detail);
-    const [newDebt, setNewDebt] = useState({
+    const user = useSelector((state: any) => state.auth.user);
+    const debtData = useSelector((state: any) => state.debt.data);
+    const debtDetailData = useSelector((state: any) => state.debt.detail);
+    const paymentPlanListData = useSelector((state: any) => state.paymentPlan.data.data);
+    const [isAddDebtModalVisible, setIsAddDebtModalVisible] = useState<boolean>(false);
+    const [isEditMode, setIsEditMode] = useState<boolean>(false);
+    const [isPaymentPlanModalVisible, setIsPaymentPlanModalVisible] = useState<boolean>(false);
+    const [isPaymentPlanListModalVisible, setIsPaymentPlanListModalVisible] = useState<boolean>(false);
+    const [loadingPage, setLoadingPage] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoadingDelete, setIsLoadingDelete] = useState<boolean>(false);
+    const [selectedDebtId, setSelectedDebtId] = useState<number>(0);
+    const [newDebt, setNewDebt] = useState<{
+        debtName: string;
+        lenderName: string;
+        debtAmount: string;
+        interestRate: string;
+        amount: number;
+        paymentStart: string;
+        paymentPlan: any;
+        installment: string;
+        description: string;
+    }>({
         debtName: '',
         lenderName: '',
         debtAmount: '',
         interestRate: '',
-        amount: '',
+        amount: 0,
         paymentStart: new Date().toISOString().substr(0, 10),
-        paymentPlan: [
-            {
-                paymentDate: '',
-                paymentAmount: ''
-            },
-        ],
+        paymentPlan: undefined,
         installment: '',
         description: ''
     });
+
     const [error, setError] = useState('');
-    const [paymentPlan, setPaymentPlan] = useState([]);
+    const [paymentPlan, setPaymentPlan] = useState<any>();
 
     useEffect(() => {
         if (user) {
             setLoadingPage(true);
+            //@ts-ignore
             dispatch(fetchDebtData()).then(() => setLoadingPage(false));
         };
     }, [user, dispatch]);
@@ -75,16 +82,17 @@ const Debts = () => {
         };
     }, [isEditMode, debtDetailData]);
 
-    const sortedOverduePayments = [...debtData].sort((a, b) =>
+    const sortedOverduePayments = [...debtData].sort((a: any, b: any) =>
+        //@ts-ignore
         new Date(a.paymentStart) - new Date(b.paymentStart)
     );
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         const updatedDebt = { ...newDebt, [name]: value };
 
         if (name === 'debtAmount' || name === 'interestRate') {
-            const totalAmount = updatedDebt.debtAmount * (1 + updatedDebt.interestRate / 100);
+            const totalAmount = parseFloat(updatedDebt.debtAmount) * (1 + parseFloat(updatedDebt.interestRate) / 100);
             updatedDebt.amount = parseFloat(totalAmount.toFixed(2));
         };
 
@@ -120,6 +128,7 @@ const Debts = () => {
             };
 
             setPaymentPlan(paymentPlan);
+            //@ts-ignore
             setNewDebt(debtDataWithPaymentPlan);
             setIsPaymentPlanModalVisible(true);
         };
@@ -133,7 +142,7 @@ const Debts = () => {
             lenderName: '',
             debtAmount: '',
             interestRate: '',
-            amount: '',
+            amount: 0,
             paymentStart: new Date().toISOString().substr(0, 10),
             paymentPlan: [
                 {
@@ -163,6 +172,7 @@ const Debts = () => {
         dispatch(action(requestData))
             .then(() => {
                 setLoadingPage(true);
+                //@ts-ignore
                 dispatch(fetchDebtData()).then(() => setLoadingPage(false));
                 setIsPaymentPlanModalVisible(false);
                 setIsAddDebtModalVisible(false);
@@ -171,7 +181,7 @@ const Debts = () => {
                     lenderName: '',
                     debtAmount: '',
                     interestRate: '',
-                    amount: '',
+                    amount: 0,
                     paymentStart: new Date().toISOString().substr(0, 10),
                     paymentPlan: [
                         {
@@ -189,21 +199,24 @@ const Debts = () => {
             })
             .finally(() => {
                 setIsLoading(false);
+                setIsEditMode(false);
             });
     };
 
     const deletedDebt = async () => {
         try {
             setIsLoadingDelete(true);
+            //@ts-ignore
             await dispatch(deleteDebt(selectedDebtId));
             setLoadingPage(true);
+            //@ts-ignore
             await dispatch(fetchDebtData()).then(() => setLoadingPage(false));
             setNewDebt({
                 debtName: '',
                 lenderName: '',
                 debtAmount: '',
                 interestRate: '',
-                amount: '',
+                amount: 0,
                 paymentStart: new Date().toISOString().substr(0, 10),
                 paymentPlan: [
                     {
@@ -232,21 +245,23 @@ const Debts = () => {
         setIsPaymentPlanModalVisible(false);
     };
 
-    const handleShowPaymentPlan = (debtId) => {
+    const handleShowPaymentPlan = (debtId: number) => {
         setIsPaymentPlanListModalVisible(true);
+        //@ts-ignore
         dispatch(fetchPaymentPlanData(debtId));
         setSelectedDebtId(debtId);
     };
 
     const handleRear = () => {
         setIsPaymentPlanListModalVisible(false);
-        setPaymentPlan(null);
+        setPaymentPlan([]);
     };
 
-    const handleShowDebtDetail = (debtId) => {
+    const handleShowDebtDetail = (debtId: number) => {
         setLoading(true);
         setIsEditMode(true);
         setIsAddDebtModalVisible(true);
+        //@ts-ignore
         dispatch(debtDetail(debtId)).then(() => setLoading(false));
         setSelectedDebtId(debtId);
     };
@@ -268,6 +283,7 @@ const Debts = () => {
                         onCancel={handleCancel}
                         onOk={handleOk}
                         onDelete={handleDelete}
+                        //@ts-ignore
                         handleInputChange={handleInputChange}
                         newDebt={newDebt}
                         error={error}
@@ -291,7 +307,7 @@ const Debts = () => {
                     />
                     <div className='content-area-cards'>
                         {debtData.length > 0 ? (
-                            sortedOverduePayments.map((debt, index) => (
+                            sortedOverduePayments.map((debt: any, index: number) => (
                                 <DebtListCard
                                     key={index}
                                     debtName={debt.debtName}

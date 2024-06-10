@@ -1,18 +1,31 @@
 import React from "react";
-import PropTypes from "prop-types";
 import { PieChart, Pie, Cell } from "recharts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
 import "../../../style/AreaCards.scss";
 
-const AreaCard = ({ percentFillValue, totalDebtAmount, colors, cardInfo, linkTo }) => {
-  const filledValue = percentFillValue;
-  const remainedValue = totalDebtAmount > 0 ? totalDebtAmount - filledValue : totalDebtAmount === 0 ? 0.01 : 0;
+interface CardInfo {
+  title: string;
+  value: string;
+  text: string;
+};
+
+interface AreaCardProps {
+  percentFillValue?: number;
+  totalDebtAmount?: number;
+  colors: string[];
+  cardInfo: CardInfo;
+  linkTo: string;
+};
+
+const AreaCard: React.FC<AreaCardProps> = ({ percentFillValue, totalDebtAmount, colors, cardInfo, linkTo }) => {
+  const filledValue = percentFillValue || 0;
+  const remainedValue = totalDebtAmount !== undefined ? totalDebtAmount > 0 ? totalDebtAmount - filledValue : 0.01 : undefined;
 
   const data = [
     { name: "Remained", value: remainedValue },
-    { name: "Achieved Sales", value: filledValue },
+    { name: "Achieved Sales", value: filledValue }
   ];
 
   return (
@@ -54,13 +67,3 @@ const AreaCard = ({ percentFillValue, totalDebtAmount, colors, cardInfo, linkTo 
   );
 };
 export default AreaCard;
-
-AreaCard.propTypes = {
-  colors: PropTypes.array.isRequired,
-  cardInfo: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
-    text: PropTypes.string.isRequired
-  }).isRequired,
-  linkTo: PropTypes.string.isRequired
-};

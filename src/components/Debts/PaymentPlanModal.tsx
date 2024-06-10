@@ -2,19 +2,32 @@ import React from 'react';
 import { Modal, Button, Table } from 'antd';
 import moment from 'moment';
 
-const PaymentPlanModal = ({ visible, onCancel, onOk, paymentPlan, loading }) => {
+interface PaymentPlanItem {
+    paymentDate: string;
+    paymentAmount: string;
+};
+
+interface Props {
+    visible: boolean;
+    onCancel: () => void;
+    onOk: () => void;
+    paymentPlan: PaymentPlanItem[];
+    loading: boolean;
+};
+
+const PaymentPlanModal: React.FC<Props> = ({ visible, onCancel, onOk, paymentPlan, loading }) => {
     const columns = [
         {
             title: 'Taksit Tarihi',
             dataIndex: 'paymentDate',
             key: 'paymentDate',
-            render: (text) => moment(text).format('DD.MM.YYYY')
+            render: (text: string) => moment(text).format('DD.MM.YYYY')
         },
         {
             title: 'Taksit Miktarı',
             dataIndex: 'paymentAmount',
             key: 'paymentAmount',
-            render: (text) => `${parseFloat(text).toFixed(2)} TL`
+            render: (text: string) => `${parseFloat(text).toFixed(2)} TL`
         }
     ];
 
@@ -36,7 +49,7 @@ const PaymentPlanModal = ({ visible, onCancel, onOk, paymentPlan, loading }) => 
             <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
                 <Table
                     columns={columns}
-                    dataSource={paymentPlan && paymentPlan.length > 0 && paymentPlan.map((item, index) => ({ ...item, key: index }))}
+                    dataSource={paymentPlan && paymentPlan.length > 0 ? paymentPlan.map((item, index) => ({ ...item, key: index })) : undefined}
                     pagination={false}
                 />
             </div>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { logout } from '../redux/auth/authSlice';
+import { logout } from '../redux/auth/authSlice.tsx';
 import {
     Disclosure,
     DisclosureButton,
@@ -10,22 +10,29 @@ import {
     MenuItem,
     MenuItems,
     Transition
-} from '@headlessui/react'
+} from '@headlessui/react';
 import { FiMenu, FiBell, FiX } from 'react-icons/fi';
 
-const Navbar = () => {
-    const dispatch = useDispatch();
-    const navigation = [
-        { name: 'Ana Sayfa', href: 'dashboard', current: true },
-        { name: 'Borçlarım', href: 'debts', current: false },
-    ];
+interface NavigationItem {
+    name: string;
+    href: string;
+    current: boolean;
+};
 
-    const classNames = (...classes) => {
-        return classes.filter(Boolean).join(' ')
-    };
+const Navbar: React.FC = () => {
+    const dispatch = useDispatch();
+
+    const navigation: NavigationItem[] = [
+        { name: 'Ana Sayfa', href: 'dashboard', current: true },
+        { name: 'Borçlarım', href: 'debts', current: false }
+    ];
 
     const handleLogout = () => {
         dispatch(logout());
+    };
+
+    const classNames = (...classes: string[]) => {
+        return classes.filter(Boolean).join(' ');
     };
 
     return (
@@ -60,8 +67,8 @@ const Navbar = () => {
                                                 key={item.name}
                                                 href={item.href}
                                                 className={classNames(
-                                                    'text-white hover:bg-blue-900 hover:text-white',
-                                                    'rounded-md px-3 py-2 text-sm font-medium'
+                                                    'text-white hover:text-white',
+                                                    'rounded-md px-3 py-2 text-sm font-medium',
                                                 )}
                                                 aria-current={item.current ? 'page' : undefined}
                                             >

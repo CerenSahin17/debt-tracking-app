@@ -2,7 +2,28 @@ import React from 'react';
 import { Modal, Button, Input, Spin, Form } from 'antd';
 import "../../style/AddDebtDetailModal.scss";
 
-const AddDebtModal = ({
+interface Props {
+    visible: boolean;
+    onCancel: () => void;
+    onOk: () => void;
+    onDelete: () => void;
+    handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    newDebt: {
+        debtName: string;
+        lenderName: string;
+        debtAmount: string;
+        interestRate: string;
+        paymentStart: string;
+        installment: string;
+        description: string;
+    };
+    error: string;
+    isEditMode: boolean;
+    loading: boolean;
+    loadingDelete: boolean;
+};
+
+const AddDebtModal: React.FC<Props> = ({
     visible,
     onCancel,
     onOk,
@@ -22,10 +43,10 @@ const AddDebtModal = ({
         return '';
     };
 
-    const handleInputToUpper = (e) => {
+    const handleInputToUpper = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         const upperValue = value.toUpperCase();
-        handleInputChange({ target: { name, value: upperValue } });
+        handleInputChange({ target: { name, value: upperValue } } as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>);
     };
 
     return (
@@ -35,7 +56,7 @@ const AddDebtModal = ({
             onOk={onOk}
             onCancel={onCancel}
             style={{ borderRadius: 20 }}
-            styles={{ body: { padding: '20px' } }}
+            styles={{ body: { maxHeight: '400px', overflowY: 'auto', padding: '20px' } }}
             footer={[
                 <Button
                     key="back"

@@ -2,16 +2,39 @@ import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
-  XAxis as RechartsXAxis,
-  YAxis as RechartsYAxis,
+  XAxis,
+  YAxis,
   Tooltip,
   Legend,
-  ResponsiveContainer,
+  ResponsiveContainer
 } from "recharts";
 import "../../../style/AreaCharts.scss";
 
-const AreaBarChart = ({ overdueAllPayments, paidPayments, totalDebtAmount }) => {
-  const [chartData, setChartData] = useState([]);
+interface Payment {
+  paymentDate: string;
+  amount: number;
+};
+
+interface MonthlyData {
+  month: string;
+  paid: number;
+  remaining: number;
+  year: number;
+  order: number;
+};
+
+interface AreaBarChartProps {
+  overdueAllPayments: Payment[];
+  paidPayments: Payment[];
+  totalDebtAmount: number;
+};
+
+const AreaBarChart: React.FC<AreaBarChartProps> = ({
+  overdueAllPayments,
+  paidPayments,
+  totalDebtAmount
+}) => {
+  const [chartData, setChartData] = useState<MonthlyData[]>([]);
   const allMonths = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
     "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
@@ -19,7 +42,7 @@ const AreaBarChart = ({ overdueAllPayments, paidPayments, totalDebtAmount }) => 
 
   useEffect(() => {
     const currentYear = new Date().getFullYear();
-    const monthlyData = {};
+    const monthlyData: { [key: string]: MonthlyData } = {};
 
     allMonths.forEach((month, index) => {
       const key = `${month} ${currentYear}`;
@@ -27,7 +50,7 @@ const AreaBarChart = ({ overdueAllPayments, paidPayments, totalDebtAmount }) => 
     });
 
     if (overdueAllPayments) {
-      overdueAllPayments.forEach(payment => {
+      overdueAllPayments.forEach((payment: Payment) => {
         const paymentDate = new Date(payment.paymentDate);
         const month = allMonths[paymentDate.getMonth()];
         const year = paymentDate.getFullYear();
@@ -39,7 +62,7 @@ const AreaBarChart = ({ overdueAllPayments, paidPayments, totalDebtAmount }) => 
     };
 
     if (paidPayments) {
-      paidPayments.forEach(payment => {
+      paidPayments.forEach((payment: Payment) => {
         const paymentDate = new Date(payment.paymentDate);
         const month = allMonths[paymentDate.getMonth()];
         const year = paymentDate.getFullYear();
@@ -54,15 +77,15 @@ const AreaBarChart = ({ overdueAllPayments, paidPayments, totalDebtAmount }) => 
     setChartData(sortedData);
   }, [overdueAllPayments, paidPayments]);
 
-  const formatTooltipValue = (value) => {
+  const formatTooltipValue = (value: number) => {
     return `${value.toFixed(2)} TL`;
   };
 
-  const formatYAxisLabel = (value) => {
+  const formatYAxisLabel = (value: number) => {
     return `${(value / 1000).toFixed(0)}K TL`;
   };
 
-  const formatLegendValue = (value) => {
+  const formatLegendValue = (value: string) => {
     return value.charAt(0).toUpperCase() + value.slice(1);
   };
 
@@ -91,14 +114,14 @@ const AreaBarChart = ({ overdueAllPayments, paidPayments, totalDebtAmount }) => 
               bottom: 5,
             }}
           >
-            <RechartsXAxis
+            <XAxis
               padding={{ left: 10 }}
               dataKey="month"
               axisLine={false}
               tick={{ fontSize: 14 }}
               tickCount={allMonths.length}
             />
-            <RechartsYAxis
+            <YAxis
               padding={{ bottom: 10, top: 10 }}
               tickFormatter={formatYAxisLabel}
               tickCount={6}

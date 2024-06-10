@@ -1,7 +1,19 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axiosInstance from '../../app/axiosSetup';
+import axiosInstance from '../../app/axiosSetup.tsx';
 
-export const fetchDebtData = createAsyncThunk('debt/fetchDebtData', async (_, { rejectWithValue }) => {
+interface DebtState {
+    data: any[];
+    status: 'idle' | 'loading' | 'succeeded' | 'failed';
+    error: string | null;
+    detail: any | null;
+};
+
+interface DebtDetail {
+    debtId: string;
+    updatedData: any;
+};
+
+export const fetchDebtData = createAsyncThunk<any, void, { rejectValue: string | null }>('debt/fetchDebtData', async (_, { rejectWithValue }) => {
     try {
         const response = await axiosInstance.get('/debt');
         console.log('Debt Data', response.data.data);
@@ -12,7 +24,7 @@ export const fetchDebtData = createAsyncThunk('debt/fetchDebtData', async (_, { 
     };
 });
 
-export const debtDetail = createAsyncThunk('debt/debtDetail', async (debtId, { rejectWithValue }) => {
+export const debtDetail = createAsyncThunk<any, string, { rejectValue: string | null }>('debt/debtDetail', async (debtId, { rejectWithValue }) => {
     console.log('Debt Detail Id', debtId);
     try {
         const response = await axiosInstance.get(`/debt/${debtId}`);
@@ -24,7 +36,7 @@ export const debtDetail = createAsyncThunk('debt/debtDetail', async (debtId, { r
     };
 });
 
-export const addDebt = createAsyncThunk('debt/addDebt', async (debtData, { rejectWithValue }) => {
+export const addDebt = createAsyncThunk<any, any, { rejectValue: string | null }>('debt/addDebt', async (debtData, { rejectWithValue }) => {
     console.log('Creat Debt Body', debtData);
     try {
         const response = await axiosInstance.post('/debt', debtData);
@@ -36,7 +48,7 @@ export const addDebt = createAsyncThunk('debt/addDebt', async (debtData, { rejec
     };
 });
 
-export const deleteDebt = createAsyncThunk('paymentPlan/deleteDebt', async (debtId, { rejectWithValue }) => {
+export const deleteDebt = createAsyncThunk<any, string, { rejectValue: string | null }>('paymentPlan/deleteDebt', async (debtId, { rejectWithValue }) => {
     console.log('Delete Debt Id', debtId);
     try {
         const response = await axiosInstance.delete(`/debt/${debtId}`);
@@ -48,7 +60,7 @@ export const deleteDebt = createAsyncThunk('paymentPlan/deleteDebt', async (debt
     };
 });
 
-export const updateDebt = createAsyncThunk('paymentPlan/updateDebt', async ({ debtId, updatedData }, { rejectWithValue }) => {
+export const updateDebt = createAsyncThunk<any, DebtDetail, { rejectValue: string | null }>('paymentPlan/updateDebt', async ({ debtId, updatedData }, { rejectWithValue }) => {
     console.log('Update Debt Id', debtId);
     console.log('Update Debt Body', updatedData);
     try {
@@ -68,11 +80,11 @@ const debtSlice = createSlice({
         status: 'idle',
         error: null,
         detail: null
-    },
+    } as DebtState,
     reducers: {
         clearDebtDetail(state) {
             state.detail = null;
-        },
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -85,7 +97,7 @@ const debtSlice = createSlice({
             })
             .addCase(fetchDebtData.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload || action.error.message;
+                state.error = (action.payload || action.error.message) as string | null;
             })
             .addCase(debtDetail.pending, (state) => {
                 state.status = 'loading';
@@ -96,7 +108,8 @@ const debtSlice = createSlice({
             })
             .addCase(debtDetail.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload || action.error.message;
+                state.error = (action.payload || action.error.message) as string | null;
+
             })
             .addCase(addDebt.pending, (state) => {
                 state.status = 'loading';
@@ -107,7 +120,7 @@ const debtSlice = createSlice({
             })
             .addCase(addDebt.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload || action.error.message;
+                state.error = (action.payload || action.error.message) as string | null;
             })
             .addCase(deleteDebt.pending, (state) => {
                 state.status = 'loading';
@@ -118,7 +131,7 @@ const debtSlice = createSlice({
             })
             .addCase(deleteDebt.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload || action.error.message;
+                state.error = (action.payload || action.error.message) as string | null;
             })
             .addCase(updateDebt.pending, (state) => {
                 state.status = 'loading';
@@ -129,7 +142,7 @@ const debtSlice = createSlice({
             })
             .addCase(updateDebt.rejected, (state, action) => {
                 state.status = 'failed';
-                state.error = action.payload || action.error.message;
+                state.error = (action.payload || action.error.message) as string | null;
             });
     }
 });

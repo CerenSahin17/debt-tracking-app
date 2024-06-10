@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
-import authReducer from '../redux/auth/authSlice';
-import debtReducer from '../redux/debt/debtSlice';
-import paymentReducer from '../redux/paymentPlan/paymentSlice';
+import authReducer from '../redux/auth/authSlice.tsx';
+import debtReducer from '../redux/debt/debtSlice.tsx';
+import paymentReducer from '../redux/paymentPlan/paymentSlice.tsx';
 
 const store = configureStore({
     reducer: {
